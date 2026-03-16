@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
-import 'screens/auth/signup_screen.dart';
+// import 'screens/auth/signup_screen.dart'; // Removing or commenting as it's unused but might be needed for later
 import 'screens/admin/admin_dashboard.dart';
 import 'screens/user/user_dashboard.dart';
 import 'utils/constants.dart';
@@ -20,7 +20,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    runApp(const ContentManagementApp());
+    runApp(const NotePlusApp());
   } catch (e) {
     print('Failed to initialize Firebase: $e');
     runApp(MaterialApp(
@@ -57,8 +57,8 @@ void main() async {
   }
 }
 
-class ContentManagementApp extends StatelessWidget {
-  const ContentManagementApp({Key? key}) : super(key: key);
+class NotePlusApp extends StatelessWidget {
+  const NotePlusApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class ContentManagementApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Content Management App',
+        title: 'NotePlus',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
@@ -111,7 +111,7 @@ class ContentManagementApp extends StatelessWidget {
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: Colors.white.withOpacity(0.8),
+            fillColor: Colors.white.withValues(alpha: 0.8),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(defaultRadius),
               borderSide: BorderSide.none,

@@ -1,4 +1,4 @@
-package com.example.content_management_app
+package com.example.noteplus_app
 
 import io.flutter.embedding.android.FlutterActivity
 

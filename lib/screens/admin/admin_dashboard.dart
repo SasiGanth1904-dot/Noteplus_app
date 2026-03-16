@@ -43,13 +43,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  void _handleAddOrUpdate(String title, String description) async {
+  void _handleAddOrUpdate(String title, String description, String imageUrl) async {
     try {
       if (_editingContent != null) {
         // Update existing
         await _firestoreService.updateContent(_editingContent!.id, {
-          'Title': title,
-          'Description': description,
+          'title': title,
+          'description': description,
+          'imageUrl': imageUrl,
           'createdAt': FieldValue.serverTimestamp(),
         });
         setState(() {
@@ -64,6 +65,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           id: '', // Firestore generates this
           title: title,
           description: description,
+          imageUrl: imageUrl,
           createdAt: Timestamp.now(),
         );
         await _firestoreService.addContent(newContent);
@@ -120,8 +122,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             child: ContentForm(
               initialData: content ?? _editingContent,
               isEditing: content != null || _editingContent != null,
-              onSubmit: (title, description) {
-                _handleAddOrUpdate(title, description);
+              onSubmit: (title, description, imageUrl) {
+                _handleAddOrUpdate(title, description, imageUrl);
                 Navigator.pop(context);
               },
               onCancel: () {
@@ -153,7 +155,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 style: GoogleFonts.outfit(color: darkTextColor, fontSize: 18),
                 decoration: InputDecoration(
                   hintText: 'Search notes...',
-                  hintStyle: GoogleFonts.outfit(color: darkTextColor.withOpacity(0.5)),
+                  hintStyle: GoogleFonts.outfit(color: darkTextColor.withValues(alpha: 0.5)),
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {

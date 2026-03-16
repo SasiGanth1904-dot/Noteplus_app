@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:random_string/random_string.dart';
 import '../../models/content_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
-import '../../services/database.dart';
 import '../../utils/constants.dart';
 import '../../widgets/content_card.dart';
 import '../../widgets/content_form.dart';
@@ -57,19 +55,17 @@ class _UserDashboardState extends State<UserDashboard> {
         ),
         child: ContentForm(
           isUserMode: true,
-          onSubmit: (title, description) async {
+          onSubmit: (title, description, imageUrl) async {
             try {
-              String Id = randomAlphaNumeric(10);
-              Map<String, dynamic> appDataMap = {
-                "Title": title,
-                "Description": description,
-                "createdAt": FieldValue.serverTimestamp(),
-                "id": Id,
-              };
+              final newContent = ContentModel(
+                id: '',
+                title: title,
+                description: description,
+                imageUrl: imageUrl,
+                createdAt: Timestamp.now(),
+              );
               
-              await DatabaseHelper().addAppData(appDataMap, Id).then((value) {
-                print("Success!");
-              });
+              await _firestoreService.addContent(newContent);
               
               if (!mounted) return;
               Navigator.pop(context);
@@ -105,17 +101,16 @@ class _UserDashboardState extends State<UserDashboard> {
           isUserMode: true,
           isEditing: true,
           initialData: content,
-          onSubmit: (title, description) async {
+          onSubmit: (title, description, imageUrl) async {
             try {
               Map<String, dynamic> updateInfo = {
-                "Title": title,
-                "Description": description,
+                "title": title,
+                "description": description,
+                "imageUrl": imageUrl,
                 "createdAt": FieldValue.serverTimestamp(),
               };
               
-              await DatabaseHelper().updateContentDetails(content.id, updateInfo).then((value) {
-                print("Update Success!");
-              });
+              await _firestoreService.updateContent(content.id, updateInfo);
               
               if (!mounted) return;
               Navigator.pop(context);
@@ -136,7 +131,7 @@ class _UserDashboardState extends State<UserDashboard> {
 
   void _deleteContent(String id) async {
     try {
-      await DatabaseHelper().deleteContentDetails(id);
+      await _firestoreService.deleteContent(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Note deleted successfully')),
@@ -160,7 +155,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 style: GoogleFonts.outfit(color: darkTextColor, fontSize: 18),
                 decoration: InputDecoration(
                   hintText: 'Search your notes...',
-                  hintStyle: GoogleFonts.outfit(color: darkTextColor.withOpacity(0.5)),
+                  hintStyle: GoogleFonts.outfit(color: darkTextColor.withValues(alpha: 0.5)),
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {

@@ -5,7 +5,7 @@ import '../utils/constants.dart';
 
 class ContentForm extends StatefulWidget {
   final ContentModel? initialData;
-  final Function(String title, String description) onSubmit;
+  final Function(String title, String description, String imageUrl) onSubmit;
   final VoidCallback onCancel;
   final bool isEditing;
   final bool isTitleDescOnly;
@@ -29,12 +29,17 @@ class _ContentFormState extends State<ContentForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+  late TextEditingController _imageUrlController;
+
+  bool _isSaving = false;
+  bool _isSuccess = false;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.initialData?.title ?? '');
     _descriptionController = TextEditingController(text: widget.initialData?.description ?? '');
+    _imageUrlController = TextEditingController(text: widget.initialData?.imageUrl ?? '');
   }
 
   @override
@@ -43,6 +48,7 @@ class _ContentFormState extends State<ContentForm> {
     if (widget.initialData?.id != oldWidget.initialData?.id) {
        _titleController.text = widget.initialData?.title ?? '';
        _descriptionController.text = widget.initialData?.description ?? '';
+       _imageUrlController.text = widget.initialData?.imageUrl ?? '';
     }
   }
 
@@ -50,20 +56,39 @@ class _ContentFormState extends State<ContentForm> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      widget.onSubmit(
-        _titleController.text.trim(),
-        _descriptionController.text.trim(),
-      );
+      setState(() {
+        _isSaving = true;
+      });
 
-      // Clear fields if adding new content
-      if (!widget.isEditing) {
-        _titleController.clear();
-        _descriptionController.clear();
+      String finalImageUrl = _imageUrlController.text.trim();
+
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _isSuccess = true;
+        });
+
+        // Delay for success animation
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        widget.onSubmit(
+          _titleController.text.trim(),
+          _descriptionController.text.trim(),
+          finalImageUrl,
+        );
+
+        // Clear fields if adding new content
+        if (!widget.isEditing) {
+          _titleController.clear();
+          _descriptionController.clear();
+          _imageUrlController.clear();
+        }
       }
     }
   }
@@ -104,18 +129,26 @@ class _ContentFormState extends State<ContentForm> {
                     color: darkTextColor,
                   ),
                 ),
-                GestureDetector(
-                  onTap: _submitForm,
-                  child: const Text(
-                    'SAVE',
-                    style: TextStyle(
-                      color: accentColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
+                _isSuccess
+                    ? const Icon(Icons.check_circle, color: Colors.green, size: 28)
+                    : _isSaving
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : GestureDetector(
+                            onTap: _submitForm,
+                            child: const Text(
+                              'SAVE',
+                              style: TextStyle(
+                                color: accentColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
               ],
             ),
             const SizedBox(height: 32),
@@ -129,7 +162,7 @@ class _ContentFormState extends State<ContentForm> {
               decoration: InputDecoration(
                 hintText: 'Title',
                 hintStyle: GoogleFonts.outfit(
-                  color: lightTextColor.withOpacity(0.5),
+                  color: lightTextColor.withValues(alpha: 0.5),
                 ),
                 filled: false,
                 border: InputBorder.none,
@@ -146,6 +179,35 @@ class _ContentFormState extends State<ContentForm> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: _imageUrlController,
+              enabled: !_isSaving,
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                color: darkTextColor,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Image URL',
+                hintStyle: GoogleFonts.outfit(
+                  color: lightTextColor.withValues(alpha: 0.5),
+                ),
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                suffixIcon: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _imageUrlController.text = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+                    });
+                  },
+                  child: const Text('SAMPLE', style: TextStyle(fontSize: 10, color: accentColor)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
               controller: _descriptionController,
               style: GoogleFonts.outfit(
                 fontSize: 16,
@@ -155,7 +217,7 @@ class _ContentFormState extends State<ContentForm> {
               decoration: InputDecoration(
                 hintText: 'Type something here...',
                 hintStyle: GoogleFonts.outfit(
-                  color: lightTextColor.withOpacity(0.5),
+                  color: lightTextColor.withValues(alpha: 0.5),
                 ),
                 filled: false,
                 border: InputBorder.none,

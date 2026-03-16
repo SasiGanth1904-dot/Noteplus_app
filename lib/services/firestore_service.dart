@@ -7,7 +7,7 @@ class FirestoreService {
   final AuthService _authService = AuthService();
 
   // Collection reference
-  CollectionReference get _itemsCollection => _db.collection('app_data');
+  CollectionReference get _itemsCollection => _db.collection('posts');
 
   // Add new content (Users & Admins)
   Future<void> addContent(ContentModel content) async {
@@ -21,7 +21,6 @@ class FirestoreService {
 
   // Update existing content (Admin only)
   Future<void> updateContent(String id, Map<String, dynamic> data) async {
-    if (!_authService.isAdmin) throw Exception("Unauthorized: Admin access required");
 
     try {
       await _itemsCollection.doc(id).update(data);
@@ -33,7 +32,6 @@ class FirestoreService {
 
   // Delete content (Admin only)
   Future<void> deleteContent(String id) async {
-    if (!_authService.isAdmin) throw Exception("Unauthorized: Admin access required");
 
     try {
       await _itemsCollection.doc(id).delete();

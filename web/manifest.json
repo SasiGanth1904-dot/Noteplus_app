@@ -1,6 +1,6 @@
 {
-    "name": "content_management_app",
-    "short_name": "content_management_app",
+    "name": "noteplus_app",
+    "short_name": "noteplus_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

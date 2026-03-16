@@ -1,4 +1,4 @@
-# content_management_app
+# NotePlus
 
 A new Flutter project.
 
